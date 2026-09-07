@@ -1,0 +1,321 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: #111;
+  color: #f2f2f2;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+.portfolio {
+  min-height: 100vh;
+  padding: 32px 40px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.portfolio__header {
+  display: flex;
+  justify-content: center;
+}
+
+.portfolio__header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+
+.project-stage {
+  position: relative;
+
+  height: 66vh;
+  min-height: 560px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-tile {
+  cursor: pointer;
+  position: absolute;
+
+  width: 300px;
+  height: 470px;
+
+  padding: 18px;
+
+  display: flex;
+  align-items: flex-end;
+
+  border: 1px solid #444;
+  background: #181818;
+
+  font-size: 11px;
+  letter-spacing: 0.08em;
+
+  opacity: 1;
+
+  transform-origin: center center;
+
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease,
+    border-color 0.35s ease,
+    background 0.35s ease;
+}
+
+/* centre tile */
+.project-tile[data-offset="0"] {
+  width: 360px;
+  height: 560px;
+
+  transform:
+    translateX(0)
+    translateY(0)
+    scale(1);
+
+  z-index: 5;
+
+  background: #222;
+  border-color: #888;
+}
+
+/* left neighbour */
+.project-tile[data-offset="-1"] {
+  transform:
+    translateX(-250px)
+    translateY(12px)
+    scale(0.92);
+
+  z-index: 4;
+}
+
+/* right neighbour */
+.project-tile[data-offset="1"] {
+  transform:
+    translateX(250px)
+    translateY(12px)
+    scale(0.92);
+
+  z-index: 4;
+}
+
+/* far left */
+.project-tile[data-offset="-2"] {
+  transform:
+    translateX(-390px)
+    translateY(28px)
+    scale(0.82);
+
+  z-index: 3;
+}
+
+/* far right */
+.project-tile[data-offset="2"] {
+  transform:
+    translateX(390px)
+    translateY(28px)
+    scale(0.82);
+
+  z-index: 3;
+}
+
+.project-tile[data-offset="-3"],
+.project-tile[data-offset="-4"] {
+  transform:
+    translateX(-560px)
+    translateY(40px)
+    scale(0.72);
+
+  opacity: 0;
+
+  z-index: 1;
+}
+
+.project-tile[data-offset="3"],
+.project-tile[data-offset="4"] {
+  transform:
+    translateX(560px)
+    translateY(40px)
+    scale(0.72);
+
+  opacity: 0;
+
+  z-index: 1;
+}
+
+.portfolio__controls {
+  height: 26vh;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  padding-bottom: 8px;
+}
+
+.portfolio__controls button,
+.portfolio__controls a {
+  border: 1px solid #555;
+  background: transparent;
+  color: inherit;
+
+  padding: 10px 14px;
+
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  border: 1px solid #555;
+  padding: 10px 14px;
+}
+
+.radio__title {
+  min-width: 140px;
+
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.radio__controls {
+  display: flex;
+  gap: 6px;
+}
+
+.radio__controls button {
+  border: 0;
+  padding: 4px 8px;
+
+  background: transparent;
+  color: inherit;
+
+  cursor: pointer;
+}
+
+.project-view {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #444;
+  background: #0d0d0d;
+}
+
+.project-view__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  z-index: 10;
+
+  border: 1px solid #555;
+  background: #111;
+  color: #f2f2f2;
+
+  padding: 8px 12px;
+
+  font-size: 10px;
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+}
+
+.shader-lab-placeholder {
+  text-align: center;
+}
+
+.shader-lab-placeholder h2 {
+  font-size: 20px;
+  letter-spacing: 0.15em;
+}
+
+.project-info-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.project-info-panel {
+  position: relative;
+
+  width: min(900px, 80vw);
+  height: min(700px, 80vh);
+
+  padding: 40px;
+
+  overflow-y: auto;
+
+  border: 1px solid #555;
+  background: #111;
+}
+
+.project-info-panel h2 {
+  margin-top: 0;
+
+  font-size: 18px;
+  letter-spacing: 0.14em;
+}
+
+.project-info-panel p {
+  max-width: 650px;
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  color: #ccc;
+}
+
+.project-info-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  border: 1px solid #555;
+  background: transparent;
+  color: inherit;
+
+  padding: 8px 12px;
+
+  font-size: 10px;
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+}
