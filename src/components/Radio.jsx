@@ -1,254 +1,223 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { tracks } from "../data/tracks";
 
-export default function Radio() {
-  const audioRef = useRef(null);
-  const waveformRef = useRef(null);
-const waveformData = useRef([]);
+const BAR_COUNT = 120;
 
+export default function Radio({ paused = false }) {
+  const audioRef = useRef(null);
+  const canvasRef = useRef(null);
+  const wantsPlayback = useRef(false);
+  const waveform = useRef([]);
   const [trackIndex, setTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const track = tracks[trackIndex];
 
-  const currentTrack = tracks[trackIndex];
+  const drawWaveform = useCallback(() => {
+    const canvas = canvasRef.current;
+    const bars = waveform.current;
+    if (!canvas || !bars.length) return;
+    const { width, height } = canvas.getBoundingClientRect();
+    if (!width || !height) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const progress = duration ? currentTime / duration : 0;
+    const stride = width / bars.length;
+    const barWidth = Math.max(1, stride - 1.5);
+    bars.forEach((sample, index) => {
+      const barHeight = Math.max(2, sample * (height - 4));
+      ctx.fillStyle = index / bars.length <= progress
+        ? "rgba(255,255,255,.95)"
+        : "rgba(255,255,255,.32)";
+      ctx.fillRect(index * stride, (height - barHeight) / 2, barWidth, barHeight);
+    });
+  }, [currentTime, duration]);
 
   useEffect(() => {
-  let cancelled = false;
-
-  async function generateWaveform() {
-    try {
-      const response = await fetch(currentTrack.src);
-      const arrayBuffer = await response.arrayBuffer();
-
-      const audioContext = new AudioContext();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-      if (cancelled) {
-        await audioContext.close();
-        return;
+    let cancelled = false;
+    const controller = new AbortController();
+    waveform.current = [];
+    setCurrentTime(0);
+    setDuration(0);
+    async function loadWaveform() {
+      let context;
+      try {
+        const response = await fetch(track.src, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Audio request failed: ${response.status}`);
+        const bytes = await response.arrayBuffer();
+        if (cancelled) return;
+        context = new AudioContext();
+        const decoded = await context.decodeAudioData(bytes);
+        if (cancelled) return;
+        const channel = decoded.getChannelData(0);
+        const blockSize = Math.max(1, Math.floor(channel.length / BAR_COUNT));
+        const samples = Array.from({ length: BAR_COUNT }, (_, i) => {
+          const start = i * blockSize;
+          const end = Math.min(start + blockSize, channel.length);
+          let sum = 0;
+          for (let j = start; j < end; j++) sum += Math.abs(channel[j]);
+          return sum / Math.max(1, end - start);
+        });
+        const peak = Math.max(...samples);
+        waveform.current = samples.map(value => peak ? value / peak : 0);
+        drawWaveform();
+      } catch (error) {
+        if (!cancelled) console.error("Could not generate waveform:", error);
+      } finally {
+        if (context) await context.close();
       }
-
-      const channelData = audioBuffer.getChannelData(0);
-
-      // Number of bars we'll eventually draw.
-      const sampleCount = 120;
-      const blockSize = Math.floor(
-        channelData.length / sampleCount
-      );
-
-      const samples = [];
-
-      for (let i = 0; i < sampleCount; i++) {
-        let sum = 0;
-
-        const start = i * blockSize;
-        const end = Math.min(
-          start + blockSize,
-          channelData.length
-        );
-
-        for (let j = start; j < end; j++) {
-          sum += Math.abs(channelData[j]);
-        }
-
-        samples.push(sum / (end - start));
-      }
-
-      // Normalise everything to 0 → 1.
-      const max = Math.max(...samples);
-
-      waveformData.current = samples.map((sample) =>
-        max > 0 ? sample / max : 0
-      );
-
-      requestAnimationFrame(drawWaveform);
-      
-
-      await audioContext.close();
-    } catch (error) {
-      console.error("Could not generate waveform:", error);
     }
-  }
+    loadWaveform();
+    return () => { cancelled = true; controller.abort(); };
+  }, [track.src]); // Drawing also runs when waveform data becomes available.
 
-  generateWaveform();
+  useEffect(() => { drawWaveform(); }, [drawWaveform]);
+  useEffect(() => {
+    const observer = new ResizeObserver(drawWaveform);
+    if (canvasRef.current) observer.observe(canvasRef.current);
+    return () => observer.disconnect();
+  }, [drawWaveform]);
 
-  return () => {
-    cancelled = true;
-  };
-}, [currentTrack.src]);
-
-useEffect(() => {
-  drawWaveform();
-}, [currentTime, duration]);
-
-function drawWaveform() {
-  const canvas = waveformRef.current;
-  const samples = waveformData.current;
-
-  if (!canvas || samples.length === 0) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-
-  const ctx = canvas.getContext("2d");
-
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, rect.width, rect.height);
-
-  const progress = duration
-    ? currentTime / duration
-    : 0;
-
-  const gap = 2;
-  const barWidth = Math.max(
-    1,
-    rect.width / samples.length - gap
-  );
-
-  samples.forEach((sample, index) => {
-    const x = index * (rect.width / samples.length);
-
-    const minHeight = 2;
-    const height = Math.max(
-      minHeight,
-      sample * rect.height
-    );
-
-    const y = (rect.height - height) / 2;
-
-    const barProgress = index / samples.length;
-
-    ctx.fillStyle =
-      barProgress <= progress
-        ? "rgba(255, 255, 255, 0.9)"
-        : "rgba(255, 255, 255, 0.22)";
-
-    ctx.fillRect(x, y, barWidth, height);
-  });
-}
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (paused || !wantsPlayback.current) {
+      audio.pause();
+      setIsPlaying(false);
+      return;
+    }
+    let cancelled = false;
+    audio.play()
+      .then(() => { if (!cancelled) setIsPlaying(true); })
+      .catch(() => { if (!cancelled) setIsPlaying(false); });
+    return () => { cancelled = true; };
+  }, [paused, trackIndex]);
 
   function togglePlay() {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
+    const audio = audioRef.current;
+    if (!audio || paused) return;
+    if (wantsPlayback.current) {
+      wantsPlayback.current = false;
+      audio.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play();
-      setIsPlaying(true);
+      wantsPlayback.current = true;
+      audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }
   }
 
   function changeTrack(direction) {
-    const nextIndex =
-      (trackIndex + direction + tracks.length) % tracks.length;
-
-setCurrentTime(0);
-setDuration(0);
-
-    setTrackIndex(nextIndex);
-    setIsPlaying(true);
-
-    setTimeout(() => {
-      audioRef.current?.play();
-    }, 0);
+    if (!tracks.length) return;
+    wantsPlayback.current = true;
+    setCurrentTime(0);
+    setDuration(0);
+    setTrackIndex(index => (index + direction + tracks.length) % tracks.length);
   }
 
-  function handleSeek(event) {
-  if (!audioRef.current || !duration) return;
-
-  const rect = event.currentTarget.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const percentage = clickX / rect.width;
-
-  const newTime = percentage * duration;
-
-  audioRef.current.currentTime = newTime;
-  setCurrentTime(newTime);
-}
+  function seekTo(clientX, element) {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const rect = element.getBoundingClientRect();
+    const fraction = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    audio.currentTime = fraction * duration;
+    setCurrentTime(audio.currentTime);
+  }
 
   return (
-  <div className="radio">
-    <audio
-  ref={audioRef}
-  src={currentTrack.src}
-  preload="metadata"
-  onTimeUpdate={(event) => {
-    const audio = event.currentTarget;
-
-    setCurrentTime(audio.currentTime);
-
-    if (Number.isFinite(audio.duration)) {
-      setDuration(audio.duration);
-    }
-  }}
-  onDurationChange={(event) => {
-    const audio = event.currentTarget;
-
-    if (Number.isFinite(audio.duration)) {
-      setDuration(audio.duration);
-    }
-  }}
-  onLoadedMetadata={(event) => {
-    const audio = event.currentTarget;
-
-    if (Number.isFinite(audio.duration)) {
-      setDuration(audio.duration);
-    }
-  }}
-  onEnded={() => changeTrack(1)}
-/>
-
-    <div className="radio__top">
-      <span className="radio__title">
-        {currentTrack.title}
-      </span>
-
-      <span className="radio__count">
-        {String(trackIndex + 1).padStart(2, "0")} /{" "}
-        {String(tracks.length).padStart(2, "0")}
-      </span>
-    </div>
-
-    <div className="radio__bottom">
-      <button
-        className="radio__play"
-        onClick={togglePlay}
-        aria-label={isPlaying ? "Pause" : "Play"}
-      >
-        {isPlaying ? "Ⅱ" : "▶"}
-      </button>
-
-<div
-  className="radio__progress"
-  onClick={handleSeek}
->
-  <canvas
-    ref={waveformRef}
-    className="radio__waveform"
-  />
-</div>
-
-      <div className="radio__skip">
-        <button
-          onClick={() => changeTrack(-1)}
-          aria-label="Previous track"
-        >
-          ←
+    <div className="radio">
+      <audio
+        ref={audioRef}
+        src={track.src}
+        preload="metadata"
+        onVolumeChange={event => setVolume(event.currentTarget.volume)}
+        onTimeUpdate={event => setCurrentTime(event.currentTarget.currentTime)}
+        onDurationChange={event => {
+          const value = event.currentTarget.duration;
+          if (Number.isFinite(value)) setDuration(value);
+        }}
+        onLoadedMetadata={event => {
+          event.currentTarget.volume = volume;
+          const value = event.currentTarget.duration;
+          if (Number.isFinite(value)) setDuration(value);
+        }}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => changeTrack(1)}
+      />
+      <div className="radio__top">
+        <span className="radio__title">{track.title}</span>
+        <div className="radio__navigation">
+          <button type="button" onClick={() => changeTrack(-1)} aria-label="Previous track">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path d="M11 6 5 12l6 6M5 12h14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" strokeLinejoin="miter" />
+            </svg>
+          </button>
+        <span className="radio__count">
+          {String(trackIndex + 1).padStart(2, "0")} / {String(tracks.length).padStart(2, "0")}
+        </span>
+          <button type="button" onClick={() => changeTrack(1)} aria-label="Next track">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path d="m13 6 6 6-6 6m6-6H5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" strokeLinejoin="miter" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div className="radio__bottom">
+        <button type="button" className="radio__play" onClick={togglePlay}
+          disabled={paused} aria-label={isPlaying ? "Pause" : "Play"}>
+          {isPlaying ? (
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <rect x="5" y="4" width="5" height="16" fill="currentColor" />
+              <rect x="14" y="4" width="5" height="16" fill="currentColor" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M6 3.5L20 12 6 20.5Z" fill="currentColor" />
+            </svg>
+          )}
         </button>
-
-        <button
-          onClick={() => changeTrack(1)}
-          aria-label="Next track"
-        >
-          →
-        </button>
+        <div className="radio__progress" role="slider" tabIndex={0}
+          aria-label="Seek through track" aria-valuemin={0} aria-valuemax={100}
+          aria-valuenow={duration ? Math.round(currentTime / duration * 100) : 0}
+          onClick={event => seekTo(event.clientX, event.currentTarget)}
+          onKeyDown={event => {
+            if (!audioRef.current || !duration) return;
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault();
+            audioRef.current.currentTime = Math.max(0, Math.min(duration,
+              audioRef.current.currentTime + (event.key === "ArrowRight" ? 5 : -5)));
+            setCurrentTime(audioRef.current.currentTime);
+          }}>
+          <canvas ref={canvasRef} className="radio__waveform" />
+        </div>
+      </div>
+      <div className="radio__volume">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+          {volume > 0 && <path d="M16 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />}
+          {volume > 0.5 && <path d="M18 6a8 8 0 0 1 0 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />}
+        </svg>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={volume}
+          aria-label="Volume"
+          style={{ "--volume": `${volume * 100}%` }}
+          onChange={event => {
+            const next = Number(event.target.value);
+            setVolume(next);
+            if (audioRef.current) audioRef.current.volume = next;
+          }}
+        />
       </div>
     </div>
-  </div>
-);
+  );
 }

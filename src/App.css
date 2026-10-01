@@ -101,8 +101,12 @@ a {
   overflow: hidden;
   isolation: isolate;
 
-  border: 1px solid #444;
-  background: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+
+  background: rgba(12, 12, 12, 0.52);
+
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15); 
 
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -130,20 +134,18 @@ box-shadow:
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.04) 0%,
-      rgba(0, 0, 0, 0.12) 45%,
-      rgba(0, 0, 0, 0.42) 100%
-    ),
-    rgba(0, 0, 0, 0.18);
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.01) 35%,
+      rgba(0, 0, 0, 0.18) 100%
+    );
 
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 
   z-index: 1;
   pointer-events: none;
 }
-
 .project-tile__video {
   position: absolute;
   inset: 0;
@@ -213,8 +215,8 @@ box-shadow:
 
   z-index: 5;
 
-  background: #222;
-  border-color: #888;
+  background: rgba(18, 18, 18, 0.46);
+  border-color: rgba(255, 255, 255, 0.38);
 }
 
 /* left neighbour */
@@ -359,104 +361,85 @@ box-shadow:
 }
 
 
+/* Replace the existing .radio rules in App.css with these rules. */
 .radio {
   grid-column: 8 / 12;
   align-self: end;
-
   display: flex;
   flex-direction: column;
-  gap: 10px;
-
+  gap: 15px;
   min-width: 0;
-
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 10px 12px 9px;
-
-  background: rgba(255, 255, 255, 0.015);
+  padding: 14px 16px 13px;
+  border: 1px solid rgba(255,255,255,.27);
+  background: rgba(16,16,19,.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #f2f2f2;
+  font-family: 'Forma DJR', Arial, sans-serif;
 }
+.radio__top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.radio__title { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; font-weight: 500; letter-spacing: .025em; }
+.radio__count { flex-shrink: 0; opacity: .58; font-size: 10px; letter-spacing: .11em; font-variant-numeric: tabular-nums; }
+.radio__bottom { display: grid; grid-template-columns: 24px minmax(0,1fr) 52px; align-items: center; gap: 15px; }
+.radio button { display: inline-flex; align-items: center; justify-content: center; padding: 0; margin: 0; border: 0; background: none; color: inherit; cursor: pointer; transition: opacity .18s ease; }
+.radio button:disabled { opacity: .3; cursor: not-allowed; }
+.radio button:focus-visible, .radio__progress:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
+.radio__play { width: 24px; height: 26px; }
+.radio__play svg { display: block; }
+.radio__progress { position: relative; height: 30px; min-width: 0; cursor: pointer; }
+.radio__waveform { display: block; width: 100%; height: 100%; }
+.radio__skip { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.radio__skip button { width: 22px; height: 26px; opacity: .65; }
+.radio__skip button:hover, .radio__play:hover { opacity: 1; }
+@media(max-width: 700px) { .radio { grid-column: 4 / 13; } }
 
-.radio__top {
+
+/* Compact volume control */
+.radio__volume {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  justify-content: flex-end;
+  gap: 10px;
+  color: rgba(255,255,255,.65);
 }
-
-.radio__title,
-.radio__count {
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  line-height: 1;
-}
-
-.radio__title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.radio__count {
-  flex-shrink: 0;
-  opacity: 0.6;
-}
-
-.radio__bottom {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-}
-
-.radio button {
-  border: 0;
-  background: transparent;
-  color: inherit;
-
+.radio__volume input {
+  width: 90px;
+  height: 14px;
   margin: 0;
   padding: 0;
-
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
   cursor: pointer;
 }
-
-.radio__play {
-  width: 18px;
-
-  font-size: 9px;
-  line-height: 1;
-
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+.radio__volume input::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(to right, #f2f2f2 var(--volume), rgba(255,255,255,.25) var(--volume));
 }
-
-.radio__progress {
-  position: relative;
-  width: 100%;
-  height: 22px;
-  cursor: pointer;
+.radio__volume input::-moz-range-track {
+  height: 2px;
+  background: rgba(255,255,255,.25);
 }
-
-.radio__waveform {
-  display: block;
-  width: 100%;
-  height: 100%;
+.radio__volume input::-moz-range-progress { height: 2px; background: #f2f2f2; }
+.radio__volume input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 7px;
+  height: 7px;
+  margin-top: -2.5px;
+  border: 0;
+  border-radius: 50%;
+  background: #f2f2f2;
 }
-
-.radio__skip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.radio__volume input::-moz-range-thumb {
+  width: 7px;
+  height: 7px;
+  border: 0;
+  border-radius: 50%;
+  background: #f2f2f2;
 }
+.radio__volume input:focus-visible { outline: 1px solid white; outline-offset: 3px; }
 
-.radio__skip button {
-  font-size: 11px;
-  opacity: 0.65;
-}
 
-.radio__skip button:hover,
-.radio__play:hover {
-  opacity: 1;
-}
 
 .project-view {
   position: relative;
@@ -558,4 +541,244 @@ box-shadow:
   letter-spacing: 0.12em;
 
   cursor: pointer;
+}
+
+/* Keep project information above embedded apps */
+
+
+
+.project-info-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portfolio {
+  position: relative;
+  isolation: isolate;
+}
+
+.portfolio__background {
+  position: fixed;
+  inset: 0;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  z-index: 0;
+
+  opacity: 0;
+
+  filter: blur(2px);
+  transform: scale(1.03);
+
+  animation: portfolio-background-in 1.2s ease forwards;
+}
+
+.portfolio > *:not(.portfolio__background) {
+  position: relative;
+  z-index: 1;
+}
+
+.portfolio__background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: rgba(10, 12, 14, 0.28);
+
+  pointer-events: none;
+}
+
+@keyframes portfolio-background-in {
+  from {
+    opacity: 0;
+    transform: scale(1.045);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+/* Embedded applications share one immersive presentation. */
+.portfolio--app-open { padding: 0; height: 100dvh; min-height: 0; overflow: hidden; }
+.portfolio--app-open .portfolio__background { display: none; }
+.portfolio--app-open .project-stage { position: fixed; inset: 0; width: 100%; height: 100dvh; min-height: 0; z-index: 100; }
+.portfolio__controls--hidden { position: fixed; left: -200vw; top: -200vh; pointer-events: none; visibility: hidden; }
+.project-view--immersive { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; overflow: hidden; }
+.project-view--immersive > :last-child:not(.project-view__toolbar) { width: 100%; height: 100%; }
+.project-view__toolbar { position: fixed; z-index: 1001; top: 18px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; pointer-events: none; font-family: 'Forma DJR', Arial, sans-serif; }
+.project-view__name { padding: 10px 13px; background: rgba(13,12,19,.83); border: 1px solid rgba(245,236,242,.28); backdrop-filter: blur(14px); font-size: 11px; letter-spacing: .12em; }
+.project-view__actions { display: flex; gap: 8px; pointer-events: auto; }
+.project-view__toolbar button { position: static; border: 1px solid rgba(245,236,242,.45); background: rgba(13,12,19,.85); backdrop-filter: blur(14px); color: #f1ebdd; padding: 10px 14px; font: inherit; font-size: 11px; letter-spacing: .1em; cursor: pointer; white-space: nowrap; }
+.project-view__toolbar button:hover { background: #6f5b9e; }
+.project-info-overlay { z-index: 2000; backdrop-filter: blur(10px); padding: 18px; }
+.project-info-panel { width: min(620px, 100%); height: auto; max-height: min(680px, 85dvh); background: #211b2a; border-color: #b9a3c3; box-shadow: 0 24px 100px #0009; padding: 48px 32px 32px; }
+.radio__play { width: 26px; height: 26px; justify-content: center; }
+.radio__play svg { display: block; }
+@media(max-width:600px) { .project-view__toolbar { top: 12px; left: 12px; right: 12px; } .project-view__name { display: none; } .project-view__actions { margin-left: auto; } .project-info-panel { padding: 48px 20px 24px; } }
+
+
+/* IMMERSIVE PROJECT CONTROLS */
+
+.project-view__toolbar {
+  top: auto;
+  bottom: 32px;
+  left: 40px;
+  right: 40px;
+
+  justify-content: flex-end;
+}
+
+.project-view__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .project-view__toolbar {
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+  }
+}
+
+/* Paste at the END of App.css. No JSX changes required. */
+.radio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  row-gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  background: rgba(14, 17, 20, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.radio__top {
+  grid-column: 1 / -1;
+  min-width: 0;
+  align-items: center;
+}
+.radio__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.radio__count {
+  font-size: 10px;
+  letter-spacing: .13em;
+  opacity: .5;
+}
+.radio__bottom {
+  grid-column: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 52px;
+  gap: 14px;
+  align-items: center;
+}
+.radio__play { width: 24px; height: 24px; }
+.radio__play svg { width: 16px; height: 16px; }
+.radio__progress { height: 19px; cursor: pointer; }
+.radio__waveform { width: 100%; height: 100%; }
+.radio__skip { gap: 8px; }
+.radio__skip button { width: 20px; height: 24px; font-size: 15px; opacity: .55; }
+.radio__skip button:hover { opacity: 1; }
+.radio__volume {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  color: rgba(255,255,255,.58);
+}
+.radio__volume input { width: 65px; cursor: pointer; }
+.radio button { cursor: pointer; }
+@media (max-width: 560px) {
+  .radio { column-gap: 12px; padding: 13px 12px; }
+  .radio__bottom { gap: 8px; grid-template-columns: 20px minmax(0, 1fr) 44px; }
+  .radio__volume input { width: 38px; }
+}
+
+/* Paste at the END of App.css. No JSX changes required. */
+.radio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  row-gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  background: rgba(14, 17, 20, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.radio__top {
+  grid-column: 1 / -1;
+  min-width: 0;
+  align-items: center;
+}
+.radio__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.radio__count {
+  font-size: 10px;
+  letter-spacing: .13em;
+  opacity: .5;
+}
+.radio__bottom {
+  grid-column: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 52px;
+  gap: 14px;
+  align-items: center;
+}
+.radio__play { width: 24px; height: 24px; }
+.radio__play svg { width: 16px; height: 16px; }
+.radio__progress { height: 19px; cursor: pointer; }
+.radio__waveform { width: 100%; height: 100%; }
+.radio__skip { gap: 8px; }
+.radio__skip button { width: 20px; height: 24px; font-size: 15px; opacity: .55; }
+.radio__skip button:hover { opacity: 1; }
+.radio__volume {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  color: rgba(255,255,255,.58);
+}
+.radio__volume input { width: 65px; cursor: pointer; }
+.radio button { cursor: pointer; }
+@media (max-width: 560px) {
+  .radio { column-gap: 12px; padding: 13px 12px; }
+  .radio__bottom { gap: 8px; grid-template-columns: 20px minmax(0, 1fr) 44px; }
+  .radio__volume input { width: 38px; }
+}
+
+/* Navigation flanks the track counter; waveform takes the freed space. */
+.radio__top { grid-column: 1 / -1; display: flex; justify-content: space-between; }
+.radio__navigation { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.radio__navigation button { display: flex; align-items: center; justify-content: center; width: 18px; height: 24px; padding: 0; opacity: .65; cursor: pointer; }
+.radio__navigation button:hover { opacity: 1; }
+.radio__count { white-space: nowrap; }
+.radio__bottom { grid-template-columns: 24px minmax(0, 1fr); }
+@media (max-width: 560px) {
+  .radio__navigation { gap: 6px; }
+  .radio__bottom { grid-template-columns: 20px minmax(0, 1fr); }
 }

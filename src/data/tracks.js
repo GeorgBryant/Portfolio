@@ -1,9 +1,10 @@
 export const tracks = [
-  {
+    {
     id: 1,
-    title: "A Thousand Times",
-    src: "/audio/a thousand times.wav",
+    title: "Viet Remake",
+    src: "/audio/viet remake.wav",
   },
+
   {
     id: 2,
     title: "Another Galaxy Hardstyle",
@@ -16,7 +17,8 @@ export const tracks = [
   },
   {
     id: 4,
-    title: "Worst Beat Known To Man",
-    src: "/audio/worst beat known to man.wav",
+    title: "A Thousand Times",
+    src: "/audio/a thousand times.wav",
   },
+
 ];

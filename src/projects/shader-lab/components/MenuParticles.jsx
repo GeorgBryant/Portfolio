@@ -159,7 +159,7 @@ export default function MenuParticles() {
         );
 
         context.fillStyle =
-          "rgba(255, 255, 255, 0.18)";
+          "rgba(255, 255, 255, 0.10)";
 
         context.fill();
       }

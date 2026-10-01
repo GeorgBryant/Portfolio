@@ -1,0 +1,39 @@
+.project-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 900; /* Keep the portfolio close button (1001) accessible. */
+  display: grid;
+  place-items: center;
+  background: #101010;
+  color: #eee;
+  font-family: "Forma DJR", Arial, sans-serif;
+  pointer-events: auto;
+}
+.project-loader__content {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.project-loader__content span {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+.project-loader__track {
+  height: 1px;
+  background: #444;
+  overflow: hidden;
+}
+.project-loader__progress {
+  width: 35%;
+  height: 100%;
+  background: #eee;
+  animation: project-loading 1.2s ease-in-out infinite alternate;
+}
+@keyframes project-loading {
+  from { transform: translateX(0); }
+  to { transform: translateX(185%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-loader__progress { animation: none; width: 100%; }
+}

@@ -1,0 +1,30 @@
+.pr-embedded .pr-login__dropdown{font-family:industry,Arial,sans-serif;color:#f1ebdd;box-sizing:border-box}
+.pr-embedded .pr-login{width:100%;box-sizing:border-box;padding:20px;background:#211b2a;border:1px solid #b9a3c3;box-shadow:0 20px 85px #0d0a1699}
+.pr-embedded .pr-login__header{display:flex;justify-content:space-between;align-items:center;gap:15px;font-size:10px;letter-spacing:.12em}
+.pr-embedded .pr-login__header button{border:0;background:transparent;color:#f1ebdd;font-size:16px;cursor:pointer}
+.pr-embedded .pr-login h2{font-size:32px;font-weight:500;letter-spacing:-.035em;margin:16px 0 4px}
+.pr-embedded .pr-login h2 span{color:#d45b86}
+.pr-embedded .pr-login__intro, .pr-embedded .pr-login__footnote{font-size:10px;letter-spacing:.12em;color:#c8bbd0}
+.pr-embedded .pr-login__intro{margin:0 0 12px}
+.pr-embedded .pr-login form{display:flex;flex-direction:column;gap:9px}
+.pr-embedded .pr-login label{font-size:11px;letter-spacing:.12em;margin-top:9px}
+.pr-embedded .pr-login input{box-sizing:border-box;width:100%;padding:13px;background:#130f1b;border:1px solid #766780;border-radius:0;color:#f1ebdd;font:inherit;outline:none}
+.pr-embedded .pr-login input:focus{border-color:#d45b86}
+.pr-embedded .pr-login__submit{margin-top:20px;padding:13px 15px;display:flex;justify-content:space-between;background:#6f5b9e;border:1px solid #6f5b9e;color:#fff;font:inherit;letter-spacing:.11em;cursor:pointer;transition:background 220ms cubic-bezier(.22,1,.36,1),transform 220ms cubic-bezier(.22,1,.36,1)}
+.pr-embedded .pr-login__submit:hover{background:#d45b86;transform:translateY(-2px)}
+.pr-embedded .pr-login__notice{font-size:11px;line-height:1.5;color:#e9bfd3;margin:9px 0 0}
+.pr-embedded .pr-login__footnote{margin:24px 0 0}
+.pr-embedded .pr-login select{box-sizing:border-box;width:100%;padding:13px;background:#130f1b;border:1px solid #766780;border-radius:0;color:#f1ebdd;font:inherit;outline:none;cursor:pointer}
+.pr-embedded .pr-login select:focus{border-color:#d45b86}
+.pr-embedded .pr-account{position:fixed;top:48px;right:5vw;z-index:110;font-family:industry,Arial,sans-serif;color:#f1ebdd}
+.pr-embedded .pr-account__trigger{padding:0;background:transparent;border:0;color:inherit;font:inherit;font-size:14px;letter-spacing:.12em;cursor:pointer}
+.pr-embedded .pr-account__menu{position: absolute;top: calc(100% + 14px);right: 0;width: max-content;min-width: 120px;background: #211b2a;border: 1px solid #b9a3c3;padding: 0;box-shadow: 0 16px 45px #0d0a1699;}
+.pr-embedded .pr-account__menu button{width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:10px;font:inherit;font-size:11px;letter-spacing:.08em;cursor:pointer}
+.pr-embedded .pr-account__menu button:hover{background:#6f5b9e}
+
+.pr-embedded .pr-account__trigger:hover{opacity:.7}
+.pr-embedded .pr-account__menu>button{padding:16px}
+@media(max-width:600px){.pr-embedded .pr-account{top:22px;right:20px}}
+
+/* Login has no close banner; click outside or press Escape to dismiss. */
+.pr-embedded .pr-login h2{margin-top:2px}

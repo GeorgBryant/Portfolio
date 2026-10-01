@@ -1,3 +1,4 @@
+
 import { useRef } from "react";
 
 export default function RangeSlider({
@@ -15,24 +16,28 @@ export default function RangeSlider({
 
   const range = max - min;
 
-  const lowPercent =
-    ((lowValue - min) / range) * 100;
+  const lowPercent = range
+    ? ((lowValue - min) / range) * 100
+    : 0;
 
-  const highPercent =
-    ((highValue - min) / range) * 100;
+  const highPercent = range
+    ? ((highValue - min) / range) * 100
+    : 0;
 
   function snapToStep(value) {
     const snapped =
-      Math.round((value - min) / step) * step +
+      Math.round((value - min) / step) *
+        step +
       min;
 
     const decimalPlaces =
       step.toString().split(".")[1]?.length ?? 0;
 
     return Number(
-      Math.min(max, Math.max(min, snapped)).toFixed(
-        decimalPlaces
-      )
+      Math.min(
+        max,
+        Math.max(min, snapped)
+      ).toFixed(decimalPlaces)
     );
   }
 
@@ -44,7 +49,8 @@ export default function RangeSlider({
       1,
       Math.max(
         0,
-        (clientX - bounds.left) / bounds.width
+        (clientX - bounds.left) /
+          (bounds.width || 1)
       )
     );
 
@@ -55,18 +61,18 @@ export default function RangeSlider({
 
   function updateHandle(handle, value) {
     if (handle === "low") {
-      const nextLow = Math.min(
-        value,
-        highValue - margin
+      const nextLow = Math.max(
+        min,
+        Math.min(value, highValue - margin)
       );
 
       onChange(nextLow, highValue);
       return;
     }
 
-    const nextHigh = Math.max(
-      value,
-      lowValue + margin
+    const nextHigh = Math.min(
+      max,
+      Math.max(value, lowValue + margin)
     );
 
     onChange(lowValue, nextHigh);
@@ -92,43 +98,37 @@ export default function RangeSlider({
         ? "low"
         : "high";
 
-    updateHandle(activeHandle.current, value);
-
-    window.addEventListener(
-      "pointermove",
-      handlePointerMove
+    event.currentTarget.setPointerCapture(
+      event.pointerId
     );
 
-    window.addEventListener(
-      "pointerup",
-      handlePointerUp
+    updateHandle(
+      activeHandle.current,
+      value
     );
   }
 
   function handlePointerMove(event) {
-    if (!activeHandle.current) {
-      return;
-    }
+    if (!activeHandle.current) return;
 
-    const value = getValueFromPointer(
-      event.clientX
+    updateHandle(
+      activeHandle.current,
+      getValueFromPointer(event.clientX)
     );
-
-    updateHandle(activeHandle.current, value);
   }
 
-  function handlePointerUp() {
+  function handlePointerUp(event) {
     activeHandle.current = null;
 
-    window.removeEventListener(
-      "pointermove",
-      handlePointerMove
-    );
-
-    window.removeEventListener(
-      "pointerup",
-      handlePointerUp
-    );
+    if (
+      event.currentTarget.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    }
   }
 
   return (
@@ -145,6 +145,9 @@ export default function RangeSlider({
         ref={trackRef}
         style={rangeStyles.trackArea}
         onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         <div style={rangeStyles.track} />
 
@@ -178,12 +181,18 @@ export default function RangeSlider({
 
 const rangeStyles = {
   control: {
+    display: "block",
+    width: "100%",
+    minWidth: 0,
     marginBottom: "18px",
+    boxSizing: "border-box",
   },
 
   header: {
     display: "flex",
+    alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
     marginBottom: "12px",
     fontSize: "14px",
   },
@@ -195,9 +204,12 @@ const rangeStyles = {
 
   trackArea: {
     position: "relative",
+    width: "100%",
+    minWidth: 0,
     height: "18px",
     cursor: "pointer",
     touchAction: "none",
+    boxSizing: "border-box",
   },
 
   track: {

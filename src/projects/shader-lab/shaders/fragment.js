@@ -52,6 +52,8 @@ export const fragmentShader = `
         uniform float smallStarBrightness;
         uniform float smallStarTwinkle;
 
+        uniform float starsEnabled;
+
         const int MAX_GALAXIES = 5;
 
 uniform int galaxyCount;
@@ -155,7 +157,7 @@ uniform float galaxyColorBiases[MAX_GALAXIES];
           float twinkle = sin(time * twinkleSpeed + starSeed * 6.28318) * 0.5 + 0.5;
           twinkle = mix(0.6, 1.0, twinkle);
 
-          return starExists * starShape * twinkle;
+          return starExists * starShape * twinkle * starsEnabled;
         }
 
         float createLuminosityField(vec2 position) {

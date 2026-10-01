@@ -165,5 +165,6 @@ export const PARAM_GROUPS = [
 export const DEFAULT_SETTINGS = {
   ...Object.fromEntries(PARAMS.map((param) => [param.key, param.default])),
   paused: false,
+  starsEnabled: true,
 };
 

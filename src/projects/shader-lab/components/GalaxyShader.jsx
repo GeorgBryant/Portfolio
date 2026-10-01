@@ -209,6 +209,10 @@ const uniforms = {
     value: 0,
   },
 
+  starsEnabled: {
+  value: settings.starsEnabled ? 1.0 : 0.0,
+},
+
 
   galaxyInteractionDirections: {
   value: galaxies.map(
@@ -304,6 +308,9 @@ galaxyInteractionStrengths: {
 
     material.uniforms.time.value =
       elapsedTime.current;
+
+      material.uniforms.starsEnabled.value =
+  settings.starsEnabled ? 1.0 : 0.0;
 
     for (const parameter of PARAMS) {
       const {
